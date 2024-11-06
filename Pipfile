@@ -7,6 +7,8 @@ name = "pypi"
 flask = "*"
 podcastfy = "*"
 python-dotenv = "*"
+gunicorn = "*"
+flask-cors = "*"
 
 [dev-packages]
 
