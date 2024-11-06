@@ -1,0 +1,15 @@
+# .gitignore
+
+# Ignore environment variables
+.env
+
+# Ignore configuration files
+config.yaml
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore static files
+static/
+data/
