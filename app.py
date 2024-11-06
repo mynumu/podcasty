@@ -38,7 +38,7 @@ def index():
         try:
             # Set up the configuration dictionary
             conversation_config = {
-                'word_count': 800,
+                'word_count': 2000,
                 'conversation_style': ['Engaging', 'Fast-paced', 'Enthusiastic', 'Educational'],
                 'roles_person1': 'Interviewer',
                 'roles_person2': 'Subject matter expert',

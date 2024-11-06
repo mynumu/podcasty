@@ -19,10 +19,11 @@
       .container {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 40px 20px;
+        padding: 40px;
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 40px;
+        box-sizing: border-box;
       }
 
       @media (max-width: 768px) {
@@ -44,6 +45,8 @@
         padding: 30px;
         border-radius: 16px;
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        width: 100%;
+        box-sizing: border-box;
       }
 
       .api-keys-section {
@@ -55,6 +58,8 @@
 
       .form-group {
         margin-bottom: 20px;
+        width: 100%;
+        box-sizing: border-box;
       }
 
       label {
@@ -73,6 +78,8 @@
         border-radius: 8px;
         font-size: 14px;
         transition: border-color 0.2s;
+        box-sizing: border-box;
+        margin: 0;
       }
 
       input:focus,
@@ -188,6 +195,112 @@
         padding: 12px 20px;
         width: auto;
       }
+
+      .url-input-container {
+        position: relative;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .url-preview-container {
+        margin-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .url-preview-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        background: #f5f5f7;
+        border-radius: 8px;
+        gap: 12px;
+        animation: slideIn 0.2s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .url-preview-item img {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+      }
+
+      .url-preview-item .url-title {
+        flex: 1;
+        font-size: 14px;
+        color: #1d1d1f;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .url-preview-item .remove-url {
+        background: none;
+        border: none;
+        padding: 4px;
+        color: #86868b;
+        cursor: pointer;
+        width: auto;
+        transition: color 0.2s;
+      }
+
+      .url-preview-item .remove-url:hover {
+        color: #ff3b30;
+      }
+
+      .url-input {
+        min-height: 100px;
+        resize: vertical;
+        font-family: inherit;
+        line-height: 1.5;
+      }
+
+      .url-helper {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        font-size: 12px;
+        color: #86868b;
+      }
+
+      .parse-urls-btn {
+        background-color: #f5f5f7;
+        color: #1d1d1f;
+        margin-top: 8px;
+      }
+
+      .parse-urls-btn:hover {
+        background-color: #e5e5ea;
+      }
+
+      .clear-form-btn:hover {
+        background-color: #ff3b30 !important;
+        opacity: 1 !important;
+      }
+
+      /* Add transition for form fields */
+      input,
+      textarea,
+      select {
+        transition: all 0.2s ease;
+      }
+
+      /* Add visual feedback for saved state */
+      input:not(:placeholder-shown),
+      textarea:not(:placeholder-shown) {
+        border-color: #34c759;
+      }
     </style>
   </head>
   <body>
@@ -197,8 +310,20 @@
       <div class="form-section">
         <form id="podcastForm">
           <div class="form-group">
-            <label for="urls">Enter URLs (comma-separated)</label>
-            <input type="text" id="urls" name="urls" required />
+            <label for="urls">Enter URLs</label>
+            <div class="url-input-container">
+              <textarea
+                id="urlInput"
+                class="url-input"
+                placeholder="Paste one or multiple URLs (each URL on a new line or separated by commas)"
+              ></textarea>
+              <span class="url-helper">Press Enter to add URLs</span>
+            </div>
+            <button type="button" class="parse-urls-btn" id="parseUrlsBtn">
+              Parse URLs
+            </button>
+            <div class="url-preview-container" id="urlPreviewContainer"></div>
+            <input type="hidden" id="urls" name="urls" required />
           </div>
 
           <div class="form-group">
@@ -358,6 +483,282 @@
           }
         });
       });
+
+      const urlInput = document.getElementById("urlInput");
+      const urlPreviewContainer = document.getElementById(
+        "urlPreviewContainer"
+      );
+      const parseUrlsBtn = document.getElementById("parseUrlsBtn");
+      const hiddenUrlInput = document.getElementById("urls");
+
+      let urlList = [];
+
+      function isValidUrl(string) {
+        try {
+          new URL(string);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function extractUrls(text) {
+        // Split by common separators (newlines, commas, spaces)
+        const potentialUrls = text.split(/[\n,\s]+/);
+        return potentialUrls
+          .map((url) => url.trim())
+          .filter((url) => url && isValidUrl(url));
+      }
+
+      function getFaviconUrl(url) {
+        const hostname = new URL(url).hostname;
+        return `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
+      }
+
+      function createUrlPreview(url) {
+        const div = document.createElement("div");
+        div.className = "url-preview-item";
+
+        const favicon = document.createElement("img");
+        favicon.src = getFaviconUrl(url);
+        favicon.alt = "";
+
+        const urlTitle = document.createElement("span");
+        urlTitle.className = "url-title";
+        urlTitle.textContent = url;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-url";
+        removeBtn.innerHTML = "×";
+        removeBtn.onclick = () => {
+          div.remove();
+          urlList = urlList.filter((u) => u !== url);
+          updateHiddenInput();
+        };
+
+        div.appendChild(favicon);
+        div.appendChild(urlTitle);
+        div.appendChild(removeBtn);
+
+        return div;
+      }
+
+      function updateHiddenInput() {
+        hiddenUrlInput.value = urlList.join(",");
+      }
+
+      function addUrls(urls) {
+        urls.forEach((url) => {
+          if (!urlList.includes(url)) {
+            urlList.push(url);
+            urlPreviewContainer.appendChild(createUrlPreview(url));
+          }
+        });
+        updateHiddenInput();
+      }
+
+      urlInput.addEventListener("paste", (e) => {
+        // Allow the paste to happen, then parse on next tick
+        setTimeout(() => {
+          const urls = extractUrls(urlInput.value);
+          addUrls(urls);
+          urlInput.value = "";
+        }, 0);
+      });
+
+      parseUrlsBtn.addEventListener("click", () => {
+        const urls = extractUrls(urlInput.value);
+        addUrls(urls);
+        urlInput.value = "";
+      });
+
+      urlInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          const urls = extractUrls(urlInput.value);
+          addUrls(urls);
+          urlInput.value = "";
+        }
+      });
+
+      function saveFormData() {
+        const formData = {
+          podcast_name: document.getElementById("podcast_name").value,
+          podcast_tagline: document.getElementById("podcast_tagline").value,
+          user_instructions: document.getElementById("user_instructions").value,
+          tts_model: document.getElementById("tts_model").value,
+          urls: urlList, // Save the current list of URLs
+        };
+        localStorage.setItem("podcastFormData", JSON.stringify(formData));
+      }
+
+      function loadFormData() {
+        const savedData = localStorage.getItem("podcastFormData");
+        if (savedData) {
+          const formData = JSON.parse(savedData);
+
+          // Restore text inputs
+          document.getElementById("podcast_name").value =
+            formData.podcast_name || "";
+          document.getElementById("podcast_tagline").value =
+            formData.podcast_tagline || "";
+          document.getElementById("user_instructions").value =
+            formData.user_instructions || "";
+          document.getElementById("tts_model").value =
+            formData.tts_model || "gemini";
+
+          // Restore URLs
+          if (formData.urls && Array.isArray(formData.urls)) {
+            urlList = formData.urls;
+            urlList.forEach((url) => {
+              urlPreviewContainer.appendChild(createUrlPreview(url));
+            });
+            updateHiddenInput();
+          }
+        }
+      }
+
+      // Add event listeners for form fields
+      const formFields = [
+        "podcast_name",
+        "podcast_tagline",
+        "user_instructions",
+        "tts_model",
+      ];
+      formFields.forEach((fieldId) => {
+        document
+          .getElementById(fieldId)
+          .addEventListener("input", saveFormData);
+      });
+
+      // Update URL-related functions to save form data
+      function addUrls(urls) {
+        urls.forEach((url) => {
+          if (!urlList.includes(url)) {
+            urlList.push(url);
+            urlPreviewContainer.appendChild(createUrlPreview(url));
+          }
+        });
+        updateHiddenInput();
+        saveFormData(); // Save after adding URLs
+      }
+
+      // Update remove URL function
+      function createUrlPreview(url) {
+        const div = document.createElement("div");
+        div.className = "url-preview-item";
+
+        const favicon = document.createElement("img");
+        favicon.src = getFaviconUrl(url);
+        favicon.alt = "";
+
+        const urlTitle = document.createElement("span");
+        urlTitle.className = "url-title";
+        urlTitle.textContent = url;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-url";
+        removeBtn.innerHTML = "×";
+        removeBtn.onclick = () => {
+          div.remove();
+          urlList = urlList.filter((u) => u !== url);
+          updateHiddenInput();
+          saveFormData(); // Save after removing URL
+        };
+
+        div.appendChild(favicon);
+        div.appendChild(urlTitle);
+        div.appendChild(removeBtn);
+
+        return div;
+      }
+
+      // Add clear form functionality
+      function clearFormData() {
+        localStorage.removeItem("podcastFormData");
+        document.getElementById("podcastForm").reset();
+        urlList = [];
+        urlPreviewContainer.innerHTML = "";
+        updateHiddenInput();
+      }
+
+      // Add a clear form button to your HTML
+      const clearButton = document.createElement("button");
+      clearButton.type = "button";
+      clearButton.className = "clear-form-btn";
+      clearButton.textContent = "Clear Form";
+      clearButton.onclick = clearFormData;
+      clearButton.style.cssText = `
+        background-color: #ff3b30;
+        margin-top: 20px;
+        opacity: 0.8;
+      `;
+      document.getElementById("podcastForm").appendChild(clearButton);
+
+      // Update your window load event listener
+      window.addEventListener("load", () => {
+        // Load API keys (existing code)
+        ["gemini", "openai", "elevenlabs"].forEach((service) => {
+          const savedKey = localStorage.getItem(`${service}_key`);
+          if (savedKey) {
+            document.getElementById(`${service}_key`).value = savedKey;
+          }
+        });
+
+        // Load form data
+        loadFormData();
+      });
+
+      // Add success handler to clear form after successful submission
+      document
+        .getElementById("podcastForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const loadingOverlay = document.getElementById("loadingOverlay");
+          const resultSection = document.getElementById("resultSection");
+
+          loadingOverlay.classList.add("active");
+
+          const formData = new FormData(e.target);
+          formData.append(
+            "gemini_key",
+            document.getElementById("gemini_key").value
+          );
+          formData.append(
+            "openai_key",
+            document.getElementById("openai_key").value
+          );
+          formData.append(
+            "elevenlabs_key",
+            document.getElementById("elevenlabs_key").value
+          );
+
+          try {
+            const response = await fetch("/", {
+              method: "POST",
+              body: formData,
+            });
+
+            const result = await response.json();
+
+            if (result.error) {
+              throw new Error(result.error);
+            }
+
+            document.getElementById("podcastDetails").textContent =
+              result.details;
+            document.getElementById("audioPlayer").src = result.audio_url;
+            resultSection.classList.add("active");
+
+            // Optional: Clear form data after successful submission
+            // clearFormData();
+          } catch (error) {
+            alert("Error: " + error.message);
+          } finally {
+            loadingOverlay.classList.remove("active");
+          }
+        });
     </script>
   </body>
 </html>
