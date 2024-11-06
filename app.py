@@ -20,6 +20,28 @@ def index():
         user_instructions = request.form.get('user_instructions')
         tts_model = request.form.get('tts_model', 'gemini')
 
+        # Get advanced settings
+        word_count = int(request.form.get('word_count', 4000))
+        creativity = float(request.form.get('creativity', 0.7))
+        roles_person1 = request.form.get('roles_person1', 'Interviewer')
+        roles_person2 = request.form.get('roles_person2', 'Subject matter expert')
+
+        # Get selected tags from form
+        conversation_style = [tag for tag in [
+            'Engaging', 'Fast-paced', 'Enthusiastic', 'Educational',
+            'Casual', 'Professional', 'Friendly'
+        ] if request.form.get(f'conversation_style_{tag}') == 'true']
+
+        dialogue_structure = [tag for tag in [
+            'Topic Introduction', 'Summary of Key Points', 'Discussions',
+            'Q&A Session', 'Farewell Messages'
+        ] if request.form.get(f'dialogue_structure_{tag}') == 'true']
+
+        engagement_techniques = [tag for tag in [
+            'Rhetorical Questions', 'Personal Testimonials', 'Quotes',
+            'Anecdotes', 'Analogies', 'Humor'
+        ] if request.form.get(f'engagement_techniques_{tag}') == 'true']
+
         # Get API keys from form
         api_keys = {
             'gemini': request.form.get('gemini_key'),
@@ -38,17 +60,17 @@ def index():
         try:
             # Set up the configuration dictionary
             conversation_config = {
-                'word_count': 2000,
-                'conversation_style': ['Engaging', 'Fast-paced', 'Enthusiastic', 'Educational'],
-                'roles_person1': 'Interviewer',
-                'roles_person2': 'Subject matter expert',
-                'dialogue_structure': ['Topic Introduction', 'Summary of Key Points', 'Discussions', 'Q&A Session', 'Farewell Messages'],
+                'word_count': word_count,
+                'conversation_style': conversation_style,
+                'roles_person1': roles_person1,
+                'roles_person2': roles_person2,
+                'dialogue_structure': dialogue_structure,
                 'podcast_name': podcast_name,
                 'podcast_tagline': podcast_tagline,
                 'output_language': 'English',
                 'user_instructions': user_instructions,
-                'engagement_techniques': ['Rhetorical Questions', 'Personal Testimonials', 'Quotes', 'Anecdotes', 'Analogies', 'Humor'],
-                'creativity': 0.7,
+                'engagement_techniques': engagement_techniques,
+                'creativity': creativity,
                 'text_to_speech': {
                     'temp_audio_dir': './data/audio/tmp/',
                     'ending_message': "Thank you for listening to this episode. Don't forget to subscribe to our podcast for more interesting conversations.",

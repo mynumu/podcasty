@@ -301,6 +301,79 @@
       textarea:not(:placeholder-shown) {
         border-color: #34c759;
       }
+
+      .advanced-settings-toggle {
+        width: 100%;
+        background: #f5f5f7;
+        color: #1d1d1f;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .advanced-settings-toggle:hover {
+        background: #e5e5ea;
+      }
+
+      .advanced-settings {
+        background: #f5f5f7;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .advanced-settings.hidden {
+        display: none;
+      }
+
+      .settings-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .full-width {
+        grid-column: 1 / -1;
+      }
+
+      .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .tag {
+        padding: 6px 12px;
+        background: white;
+        border-radius: 16px;
+        font-size: 14px;
+        cursor: pointer;
+        user-select: none;
+        border: 1px solid #d1d1d6;
+      }
+
+      .tag.selected {
+        background: #0071e3;
+        color: white;
+        border-color: #0071e3;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+
+      #creativityValue {
+        font-size: 14px;
+        color: #86868b;
+      }
     </style>
   </head>
   <body>
@@ -365,6 +438,135 @@
             <p class="info-text">
               Provide any specific instructions for the podcast generation
             </p>
+          </div>
+
+          <div class="form-group">
+            <button
+              type="button"
+              class="advanced-settings-toggle"
+              onclick="toggleAdvancedSettings()"
+            >
+              Advanced Settings
+              <span class="toggle-icon">▼</span>
+            </button>
+
+            <div id="advancedSettings" class="advanced-settings hidden">
+              <div class="settings-grid">
+                <div class="form-group">
+                  <label for="word_count">Word Count</label>
+                  <input
+                    type="number"
+                    id="word_count"
+                    name="word_count"
+                    value="4000"
+                    min="100"
+                    max="10000"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="creativity">Creativity Level</label>
+                  <input
+                    type="range"
+                    id="creativity"
+                    name="creativity"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value="0.7"
+                  />
+                  <span id="creativityValue">0.7</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="roles_person1">Interviewer Role</label>
+                  <input
+                    type="text"
+                    id="roles_person1"
+                    name="roles_person1"
+                    value="Interviewer"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="roles_person2">Expert Role</label>
+                  <input
+                    type="text"
+                    id="roles_person2"
+                    name="roles_person2"
+                    value="Subject matter expert"
+                  />
+                </div>
+
+                <div class="form-group full-width">
+                  <label>Conversation Style</label>
+                  <div class="tag-container" id="conversationStyle">
+                    <span class="tag selected" data-value="Engaging"
+                      >Engaging</span
+                    >
+                    <span class="tag selected" data-value="Fast-paced"
+                      >Fast-paced</span
+                    >
+                    <span class="tag selected" data-value="Enthusiastic"
+                      >Enthusiastic</span
+                    >
+                    <span class="tag selected" data-value="Educational"
+                      >Educational</span
+                    >
+                    <span class="tag" data-value="Casual">Casual</span>
+                    <span class="tag" data-value="Professional"
+                      >Professional</span
+                    >
+                    <span class="tag" data-value="Friendly">Friendly</span>
+                  </div>
+                </div>
+
+                <div class="form-group full-width">
+                  <label>Dialogue Structure</label>
+                  <div class="tag-container" id="dialogueStructure">
+                    <span class="tag selected" data-value="Topic Introduction"
+                      >Topic Introduction</span
+                    >
+                    <span
+                      class="tag selected"
+                      data-value="Summary of Key Points"
+                      >Summary</span
+                    >
+                    <span class="tag selected" data-value="Discussions"
+                      >Discussions</span
+                    >
+                    <span class="tag selected" data-value="Q&A Session"
+                      >Q&A</span
+                    >
+                    <span class="tag selected" data-value="Farewell Messages"
+                      >Farewell</span
+                    >
+                  </div>
+                </div>
+
+                <div class="form-group full-width">
+                  <label>Engagement Techniques</label>
+                  <div class="tag-container" id="engagementTechniques">
+                    <span class="tag selected" data-value="Rhetorical Questions"
+                      >Questions</span
+                    >
+                    <span
+                      class="tag selected"
+                      data-value="Personal Testimonials"
+                      >Testimonials</span
+                    >
+                    <span class="tag selected" data-value="Quotes">Quotes</span>
+                    <span class="tag selected" data-value="Anecdotes"
+                      >Anecdotes</span
+                    >
+                    <span class="tag selected" data-value="Analogies"
+                      >Analogies</span
+                    >
+                    <span class="tag selected" data-value="Humor">Humor</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <button type="submit">Generate Podcast</button>
@@ -587,7 +789,22 @@
           podcast_tagline: document.getElementById("podcast_tagline").value,
           user_instructions: document.getElementById("user_instructions").value,
           tts_model: document.getElementById("tts_model").value,
-          urls: urlList, // Save the current list of URLs
+          urls: urlList, // From URL handling code
+
+          // Advanced settings
+          word_count: document.getElementById("word_count").value,
+          creativity: document.getElementById("creativity").value,
+          roles_person1: document.getElementById("roles_person1").value,
+          roles_person2: document.getElementById("roles_person2").value,
+          conversation_style: Array.from(
+            document.querySelectorAll("#conversationStyle .tag.selected")
+          ).map((tag) => tag.dataset.value),
+          dialogue_structure: Array.from(
+            document.querySelectorAll("#dialogueStructure .tag.selected")
+          ).map((tag) => tag.dataset.value),
+          engagement_techniques: Array.from(
+            document.querySelectorAll("#engagementTechniques .tag.selected")
+          ).map((tag) => tag.dataset.value),
         };
         localStorage.setItem("podcastFormData", JSON.stringify(formData));
       }
@@ -597,7 +814,7 @@
         if (savedData) {
           const formData = JSON.parse(savedData);
 
-          // Restore text inputs
+          // Load existing form data
           document.getElementById("podcast_name").value =
             formData.podcast_name || "";
           document.getElementById("podcast_tagline").value =
@@ -607,7 +824,7 @@
           document.getElementById("tts_model").value =
             formData.tts_model || "gemini";
 
-          // Restore URLs
+          // Load URLs
           if (formData.urls && Array.isArray(formData.urls)) {
             urlList = formData.urls;
             urlList.forEach((url) => {
@@ -615,87 +832,56 @@
             });
             updateHiddenInput();
           }
+
+          // Load advanced settings
+          document.getElementById("word_count").value =
+            formData.word_count || 4000;
+          document.getElementById("creativity").value =
+            formData.creativity || 0.7;
+          document.getElementById("creativityValue").textContent =
+            formData.creativity || 0.7;
+          document.getElementById("roles_person1").value =
+            formData.roles_person1 || "Interviewer";
+          document.getElementById("roles_person2").value =
+            formData.roles_person2 || "Subject matter expert";
+
+          // Load selected tags
+          [
+            "conversation_style",
+            "dialogue_structure",
+            "engagement_techniques",
+          ].forEach((field) => {
+            if (formData[field]) {
+              document.querySelectorAll(`#${field} .tag`).forEach((tag) => {
+                tag.classList.toggle(
+                  "selected",
+                  formData[field].includes(tag.dataset.value)
+                );
+              });
+            }
+          });
         }
       }
 
-      // Add event listeners for form fields
+      // Add event listeners for all form fields to trigger save
       const formFields = [
         "podcast_name",
         "podcast_tagline",
         "user_instructions",
         "tts_model",
+        "word_count",
+        "creativity",
+        "roles_person1",
+        "roles_person2",
       ];
+
       formFields.forEach((fieldId) => {
         document
           .getElementById(fieldId)
           .addEventListener("input", saveFormData);
       });
 
-      // Update URL-related functions to save form data
-      function addUrls(urls) {
-        urls.forEach((url) => {
-          if (!urlList.includes(url)) {
-            urlList.push(url);
-            urlPreviewContainer.appendChild(createUrlPreview(url));
-          }
-        });
-        updateHiddenInput();
-        saveFormData(); // Save after adding URLs
-      }
-
-      // Update remove URL function
-      function createUrlPreview(url) {
-        const div = document.createElement("div");
-        div.className = "url-preview-item";
-
-        const favicon = document.createElement("img");
-        favicon.src = getFaviconUrl(url);
-        favicon.alt = "";
-
-        const urlTitle = document.createElement("span");
-        urlTitle.className = "url-title";
-        urlTitle.textContent = url;
-
-        const removeBtn = document.createElement("button");
-        removeBtn.className = "remove-url";
-        removeBtn.innerHTML = "×";
-        removeBtn.onclick = () => {
-          div.remove();
-          urlList = urlList.filter((u) => u !== url);
-          updateHiddenInput();
-          saveFormData(); // Save after removing URL
-        };
-
-        div.appendChild(favicon);
-        div.appendChild(urlTitle);
-        div.appendChild(removeBtn);
-
-        return div;
-      }
-
-      // Add clear form functionality
-      function clearFormData() {
-        localStorage.removeItem("podcastFormData");
-        document.getElementById("podcastForm").reset();
-        urlList = [];
-        urlPreviewContainer.innerHTML = "";
-        updateHiddenInput();
-      }
-
-      // Add a clear form button to your HTML
-      const clearButton = document.createElement("button");
-      clearButton.type = "button";
-      clearButton.className = "clear-form-btn";
-      clearButton.textContent = "Clear Form";
-      clearButton.onclick = clearFormData;
-      clearButton.style.cssText = `
-        background-color: #ff3b30;
-        margin-top: 20px;
-        opacity: 0.8;
-      `;
-      document.getElementById("podcastForm").appendChild(clearButton);
-
-      // Update your window load event listener
+      // Make sure to call loadFormData when the page loads
       window.addEventListener("load", () => {
         // Load API keys (existing code)
         ["gemini", "openai", "elevenlabs"].forEach((service) => {
@@ -759,6 +945,31 @@
             loadingOverlay.classList.remove("active");
           }
         });
+
+      // Add to your existing JavaScript
+      function toggleAdvancedSettings() {
+        const settings = document.getElementById("advancedSettings");
+        const toggle = document.querySelector(
+          ".advanced-settings-toggle .toggle-icon"
+        );
+        settings.classList.toggle("hidden");
+        toggle.textContent = settings.classList.contains("hidden") ? "▼" : "▲";
+      }
+
+      // Handle tag selection
+      document.querySelectorAll(".tag-container").forEach((container) => {
+        container.addEventListener("click", (e) => {
+          if (e.target.classList.contains("tag")) {
+            e.target.classList.toggle("selected");
+            saveFormData();
+          }
+        });
+      });
+
+      // Update creativity value display
+      document.getElementById("creativity").addEventListener("input", (e) => {
+        document.getElementById("creativityValue").textContent = e.target.value;
+      });
     </script>
   </body>
 </html>
