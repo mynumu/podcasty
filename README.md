@@ -1,16 +1,19 @@
 # AI Podcast Generator 🎙️
 
-A modern web application that automatically generates engaging podcast conversations from URLs using AI. Powered by [podcastfy.ai](http://podcastfy.ai).
+A modern web application that automatically generates engaging podcast conversations from URLs or news topics using AI. Powered by [podcastfy.ai](http://podcastfy.ai).
 
 ![AI Podcast Generator Screenshot](screenshot.png)
 
 ## ✨ Features
 
+- **Two Generation Modes**:
+  - Custom Podcast: Generate from URLs
+  - News Podcast: Generate from news topics
 - **URL Processing**: Paste multiple URLs to generate content from various sources
 - **Multiple TTS Options**:
-  - Google TTS (GEMINI)
-  - OpenAI TTS
-  - ElevenLabs TTS
+  - Google TTS (GEMINI) - _Required for News Podcasts_
+  - OpenAI TTS (Custom Podcasts only)
+  - ElevenLabs TTS (Custom Podcasts only)
 - **Customizable Settings**:
   - Word count
   - Creativity level
@@ -28,8 +31,8 @@ A modern web application that automatically generates engaging podcast conversat
 
 - Python 3.10+
 - Pipenv
-- One of the following API keys:
-  - Google (Gemini) API key
+- Google (Gemini) API key (required for all features)
+- Optional for Custom Podcasts:
   - OpenAI API key
   - ElevenLabs API key
 
@@ -52,8 +55,8 @@ pipenv install
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key
-OPENAI_API_KEY=your_openai_api_key
-ELEVENLABS_API_KEY=your_elevenlabs_api_key
+OPENAI_API_KEY=your_openai_api_key  # Optional
+ELEVENLABS_API_KEY=your_elevenlabs_api_key  # Optional
 ```
 
 4. Run the application:
@@ -72,7 +75,7 @@ flask run
 
 ### Advanced Settings
 
-The application supports various customization options:
+The application supports various customization options for Custom Podcasts:
 
 ```python
 conversation_config = {
@@ -96,7 +99,10 @@ conversation_config = {
 
 Required environment variables:
 
-- `GEMINI_API_KEY`: For Google's Gemini model
+- `GEMINI_API_KEY`: For Google's Gemini model (required for all features)
+
+Optional environment variables (for Custom Podcasts):
+
 - `OPENAI_API_KEY`: For OpenAI's services
 - `ELEVENLABS_API_KEY`: For ElevenLabs TTS
 
@@ -116,6 +122,37 @@ podcast-generator/
 └── .env              # Environment variables
 ```
 
+## 💡 Usage Tips
+
+1. **Mode Selection**:
+
+   - Choose between Custom Podcast and News Podcast modes
+   - News Podcasts use Google TTS exclusively
+   - Custom Podcasts support multiple TTS options
+
+2. **URL Input** (Custom Podcast mode):
+
+   - Paste multiple URLs separated by newlines or commas
+   - URLs are automatically parsed and displayed with favicons
+   - Remove URLs by clicking the 'x' button
+
+3. **News Topics** (News Podcast mode):
+
+   - Enter any news topic to generate a podcast
+   - Uses Google TTS for optimal news delivery
+   - Automatically fetches and processes latest news
+
+4. **API Keys**:
+
+   - Keys are stored locally in your browser
+   - Never transmitted except during podcast generation
+   - Can be cleared using the "Clear Form" button
+
+5. **Advanced Settings** (Custom Podcast mode):
+   - Click "Advanced Settings" to customize generation
+   - All settings persist across page reloads
+   - Experiment with different combinations for optimal results
+
 ## 🚀 Deployment
 
 ### Deploy to Render
@@ -127,25 +164,6 @@ podcast-generator/
    - Start Command: `pipenv run gunicorn app:app --bind 0.0.0.0:$PORT`
 4. Add environment variables
 5. Deploy!
-
-## 💡 Usage Tips
-
-1. **URL Input**:
-
-   - Paste multiple URLs separated by newlines or commas
-   - URLs are automatically parsed and displayed with favicons
-   - Remove URLs by clicking the 'x' button
-
-2. **API Keys**:
-
-   - Keys are stored locally in your browser
-   - Never transmitted except during podcast generation
-   - Can be cleared using the "Clear Form" button
-
-3. **Advanced Settings**:
-   - Click "Advanced Settings" to customize generation
-   - All settings persist across page reloads
-   - Experiment with different combinations for optimal results
 
 ## 🤝 Contributing
 

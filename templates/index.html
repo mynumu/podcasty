@@ -379,11 +379,83 @@
         grid-column: 1 / -1;
         text-align: center;
       }
+
+      .mode-selector {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 32px;
+      }
+
+      .mode-button {
+        background: white;
+        border: 1px solid #d1d1d6;
+        padding: 12px 24px;
+        border-radius: 24px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 160px;
+        color: #1d1d1f;
+      }
+
+      .mode-button:hover {
+        background: #f5f5f7;
+      }
+
+      .mode-button.active {
+        background: #0071e3;
+        color: white;
+        border-color: #0071e3;
+      }
+
+      /* Smooth transitions for form visibility */
+      .form-section {
+        transition: opacity 0.3s ease;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>AI Podcast Generator</h1>
+
+      <div class="mode-selector">
+        <button class="mode-button active" data-mode="custom">
+          Custom Podcast
+        </button>
+        <button class="mode-button" data-mode="news">News Podcast</button>
+      </div>
+
+      <div id="newsForm" class="form-section" style="display: none">
+        <form id="newsPodcastForm">
+          <div class="form-group">
+            <label for="news_topic">News Topic</label>
+            <input
+              type="text"
+              id="news_topic"
+              name="news_topic"
+              placeholder="e.g., Latest news about OpenAI"
+              required
+            />
+            <p class="info-text">
+              Enter a topic to generate a news podcast about
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="tts_model_news">Text-to-Speech Model</label>
+            <select id="tts_model_news" name="tts_model" disabled>
+              <option value="gemini">Google TTS (GEMINI_API_KEY)</option>
+            </select>
+            <p class="info-text">
+              News podcasts currently only support Google TTS
+            </p>
+          </div>
+
+          <button type="submit">Generate News Podcast</button>
+        </form>
+      </div>
 
       <div class="form-section">
         <form id="podcastForm">
@@ -980,6 +1052,74 @@
       document.getElementById("creativity").addEventListener("input", (e) => {
         document.getElementById("creativityValue").textContent = e.target.value;
       });
+
+      const modeButtons = document.querySelectorAll(".mode-button");
+      const customForm = document
+        .querySelector("#podcastForm")
+        .closest(".form-section");
+      const newsForm = document.querySelector("#newsForm");
+
+      modeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          // Update button states
+          modeButtons.forEach((btn) => btn.classList.remove("active"));
+          button.classList.add("active");
+
+          // Show/hide appropriate form
+          if (button.dataset.mode === "custom") {
+            customForm.style.display = "block";
+            newsForm.style.display = "none";
+          } else {
+            customForm.style.display = "none";
+            newsForm.style.display = "block";
+          }
+        });
+      });
+
+      // Add handler for news form
+      document
+        .getElementById("newsPodcastForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const loadingOverlay = document.getElementById("loadingOverlay");
+          const resultSection = document.getElementById("resultSection");
+
+          loadingOverlay.classList.add("active");
+
+          const formData = new FormData();
+          formData.append("mode", "news");
+          formData.append(
+            "news_topic",
+            document.getElementById("news_topic").value
+          );
+          formData.append(
+            "tts_model",
+            document.getElementById("tts_model_news").value
+          );
+
+          try {
+            const response = await fetch("/", {
+              method: "POST",
+              body: formData,
+            });
+
+            const result = await response.json();
+
+            if (result.error) {
+              throw new Error(result.error);
+            }
+
+            document.getElementById("podcastDetails").textContent =
+              result.details;
+            document.getElementById("audioPlayer").src = result.audio_url;
+            resultSection.classList.add("active");
+          } catch (error) {
+            alert("Error: " + error.message);
+          } finally {
+            loadingOverlay.classList.remove("active");
+          }
+        });
     </script>
   </body>
 </html>
