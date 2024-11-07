@@ -183,14 +183,6 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 - UI inspired by Apple's design guidelines
 - Icons from Google's favicon service
 
-## 📧 Support
-
-For support:
-
-1. Check the [Issues](https://github.com/yourusername/podcast-generator/issues) page
-2. Create a new issue
-3. Contact support@podcastfy.ai
-
 ## 🔒 Security
 
 - API keys are stored in browser's localStorage
