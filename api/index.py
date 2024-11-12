@@ -1,18 +1,27 @@
 from flask import Flask, render_template, request, jsonify, send_file
-from podcastfy.client import generate_podcast
 import os
 from dotenv import load_dotenv
-import tempfile
-import shutil
 
 # Load environment variables from .env file
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__,
+    template_folder='../templates',  # Point to templates directory
+    static_folder='../static'        # Point to static directory
+)
+
+# Create a temp directory for audio files
+TEMP_DIR = '/tmp/audio'
+os.makedirs(TEMP_DIR, exist_ok=True)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
+        # Import heavy dependencies only when needed
+        from podcastfy.client import generate_podcast
+        import tempfile
+        import shutil
+
         tts_model = request.form.get('tts_model', 'gemini')
 
         # Check if this is a news podcast request
@@ -26,24 +35,21 @@ def index():
                     tts_model=tts_model
                 )
 
-                # Create static/audio directory if it doesn't exist
-                os.makedirs(os.path.join(app.static_folder, 'audio'), exist_ok=True)
-
                 # Generate a unique filename
                 filename = f"podcast_{os.urandom(8).hex()}.mp3"
-                static_file_path = os.path.join(app.static_folder, 'audio', filename)
+                output_path = os.path.join(TEMP_DIR, filename)
 
                 # Handle different return types
                 if isinstance(result, str) and os.path.isfile(result):
                     # If result is a file path
-                    shutil.copy2(result, static_file_path)
+                    shutil.copy2(result, output_path)
                     return jsonify({
                         'audio_url': f'/audio/{filename}',
                         'details': 'News podcast generated successfully'
                     })
                 elif hasattr(result, 'audio_path'):
                     # If result is an object with audio_path
-                    shutil.copy2(result.audio_path, static_file_path)
+                    shutil.copy2(result.audio_path, output_path)
                     return jsonify({
                         'audio_url': f'/audio/{filename}',
                         'details': result.details if hasattr(result, 'details') else 'News podcast generated successfully'
@@ -73,7 +79,7 @@ def index():
                 'user_instructions': request.form.get('user_instructions'),
                 'engagement_techniques': request.form.getlist('engagement_techniques[]'),
                 'text_to_speech': {
-                    'temp_audio_dir': './data/audio/tmp/',
+                    'temp_audio_dir': TEMP_DIR,
                     'ending_message': "Thank you for listening to this episode.",
                     'default_tts_model': tts_model,
                     'audio_format': 'mp3'
@@ -88,24 +94,21 @@ def index():
                     tts_model=tts_model
                 )
 
-                # Create static/audio directory if it doesn't exist
-                os.makedirs(os.path.join(app.static_folder, 'audio'), exist_ok=True)
-
                 # Generate a unique filename
                 filename = f"podcast_{os.urandom(8).hex()}.mp3"
-                static_file_path = os.path.join(app.static_folder, 'audio', filename)
+                output_path = os.path.join(TEMP_DIR, filename)
 
                 # Handle different return types
                 if isinstance(result, str) and os.path.isfile(result):
                     # If result is a file path
-                    shutil.copy2(result, static_file_path)
+                    shutil.copy2(result, output_path)
                     return jsonify({
                         'audio_url': f'/audio/{filename}',
                         'details': 'Podcast generated successfully'
                     })
                 elif hasattr(result, 'audio_path'):
                     # If result is an object with audio_path
-                    shutil.copy2(result.audio_path, static_file_path)
+                    shutil.copy2(result.audio_path, output_path)
                     return jsonify({
                         'audio_url': f'/audio/{filename}',
                         'details': result.details if hasattr(result, 'details') else 'Podcast generated successfully'
@@ -122,7 +125,7 @@ def index():
 # Add a route to serve audio files
 @app.route('/audio/<path:filename>')
 def serve_audio(filename):
-    return send_file(os.path.join(app.static_folder, 'audio', filename))
+    return send_file(os.path.join(TEMP_DIR, filename))
 
 if __name__ == '__main__':
     app.run(debug=True)

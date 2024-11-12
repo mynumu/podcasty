@@ -110,16 +110,16 @@ Optional environment variables (for Custom Podcasts):
 
 ```
 podcast-generator/
-├── app.py              # Flask application
-├── Pipfile            # Dependencies
-├── Pipfile.lock       # Locked dependencies
-├── static/            # Static files
-│   └── audio/         # Generated podcasts
-├── templates/         # HTML templates
-│   └── index.html     # Main UI template
-├── data/             # Data directory
-│   └── audio/        # Temporary audio files
-└── .env              # Environment variables
+├── api/              # Serverless API functions
+│   └── index.py      # Main Flask application
+├── templates/        # HTML templates
+│   └── index.html    # Main UI template
+├── static/          # Static files
+│   └── audio/       # Generated podcasts
+├── dev.py          # Local development server
+├── vercel.json     # Vercel configuration
+├── requirements.txt # Python dependencies
+└── .env            # Environment variables
 ```
 
 ## 💡 Usage Tips
@@ -155,15 +155,55 @@ podcast-generator/
 
 ## 🚀 Deployment
 
-### Deploy to Render
+### Deploy to Vercel
 
-1. Fork this repository
-2. Create a new Web Service on Render
-3. Use these settings:
-   - Build Command: `pip install pipenv && pipenv install --deploy --ignore-pipfile`
-   - Start Command: `pipenv run gunicorn app:app --bind 0.0.0.0:$PORT`
-4. Add environment variables
-5. Deploy!
+1. Install Vercel CLI:
+
+```bash
+npm install -g vercel
+```
+
+2. Login to Vercel:
+
+```bash
+vercel login
+```
+
+3. Deploy:
+
+```bash
+vercel
+```
+
+4. Add environment variables in Vercel dashboard:
+   - `GEMINI_API_KEY`: For Google's Gemini model (required)
+   - `OPENAI_API_KEY`: For OpenAI's services (optional)
+   - `ELEVENLABS_API_KEY`: For ElevenLabs TTS (optional)
+
+### Local Development
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/giulioco/podcastfy-ui.git
+cd podcastfy-ui
+```
+
+2. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Create a `.env` file with your API keys
+
+4. Run the development server:
+
+```bash
+python dev.py
+```
+
+5. Open `http://localhost:5000` in your browser
 
 ## 🤝 Contributing
 

@@ -19,3 +19,4 @@ static/audio/*
 !static/audio/.gitkeep
 data/audio/tmp/*
 !data/audio/tmp/.gitkeep
+.vercel
