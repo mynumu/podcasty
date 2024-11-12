@@ -5,6 +5,21 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# Create all required directories
+required_dirs = [
+    '/tmp/audio',
+    './data/transcripts',
+    './data/audio/tmp'
+]
+
+for directory in required_dirs:
+    try:
+        os.makedirs(directory, exist_ok=True)
+        # Ensure proper permissions
+        os.chmod(directory, 0o755)
+    except Exception as e:
+        print(f"Note: Could not create/modify directory {directory}: {e}")
+
 app = Flask(__name__,
     template_folder='../templates',  # Point to templates directory
     static_folder='../static'        # Point to static directory
@@ -12,7 +27,9 @@ app = Flask(__name__,
 
 # Create a temp directory for audio files
 TEMP_DIR = '/tmp/audio'
-os.makedirs(TEMP_DIR, exist_ok=True)
+
+# Add near the top of the file
+port = int(os.getenv("PORT", 8080))
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -128,4 +145,4 @@ def serve_audio(filename):
     return send_file(os.path.join(TEMP_DIR, filename))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=port)

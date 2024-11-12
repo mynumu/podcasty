@@ -1,0 +1,25 @@
+# flyctl launch added from .gitignore
+# .gitignore
+
+# Ignore environment variables
+**/.env
+
+# Ignore configuration files
+**/config.yaml
+
+# Ignore Python cache files
+**/__pycache__
+**/*.py[cod]
+
+# Ignore static files
+**/static
+**/data
+
+# Ignore audio files
+**/static/audio/*
+!**/static/audio/.gitkeep
+**/data/audio/tmp/*
+!**/data/audio/tmp/.gitkeep
+**/.vercel
+**/venv
+fly.toml

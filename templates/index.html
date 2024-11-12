@@ -21,14 +21,19 @@
         margin: 0 auto;
         padding: 40px;
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) 350px;
         gap: 40px;
         box-sizing: border-box;
       }
 
-      @media (max-width: 768px) {
+      @media (max-width: 1024px) {
         .container {
           grid-template-columns: 1fr;
+          padding: 20px;
+        }
+
+        .api-keys-section {
+          min-width: unset;
         }
       }
 
@@ -54,6 +59,10 @@
         padding: 30px;
         border-radius: 16px;
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        width: 350px;
+        position: sticky;
+        top: 40px;
+        height: fit-content;
       }
 
       .form-group {

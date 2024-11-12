@@ -29,14 +29,13 @@ A modern web application that automatically generates engaging podcast conversat
 
 ### Prerequisites
 
-- Python 3.10+
-- Pipenv
+- Python 3.9+
 - Google (Gemini) API key (required for all features)
 - Optional for Custom Podcasts:
   - OpenAI API key
   - ElevenLabs API key
 
-### Installation
+### Local Development
 
 1. Clone the repository:
 
@@ -45,13 +44,20 @@ git clone https://github.com/giulioco/podcastfy-ui.git
 cd podcastfy-ui
 ```
 
-2. Install dependencies:
+2. Create a virtual environment and activate it:
 
 ```bash
-pipenv install
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
 ```
 
-3. Create a `.env` file:
+3. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Create a `.env` file in the root directory:
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key
@@ -59,17 +65,23 @@ OPENAI_API_KEY=your_openai_api_key  # Optional
 ELEVENLABS_API_KEY=your_elevenlabs_api_key  # Optional
 ```
 
-4. Run the application:
+5. Run the development server:
 
 ```bash
-pipenv shell
-
-export FLASK_APP=app.py
-export FLASK_ENV=development
-flask run
+python dev.py
 ```
 
-5. Open `http://localhost:5000` in your browser
+6. Open `http://localhost:8080` in your browser
+
+### Production Deployment
+
+This application is configured to deploy on Fly.io. For deployment instructions, please see the [Fly.io deployment guide](https://fly.io/docs/languages-and-frameworks/python/).
+
+1. Install the Fly.io CLI
+2. Login to Fly.io: `fly auth login`
+3. Deploy: `fly launch`
+4. Set your secrets: `fly secrets set GEMINI_API_KEY=your_key_here`
+5. Deploy: `fly deploy`
 
 ## 🛠️ Configuration
 
