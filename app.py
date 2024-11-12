@@ -33,23 +33,24 @@ def index():
                 filename = f"podcast_{os.urandom(8).hex()}.mp3"
                 static_file_path = os.path.join(app.static_folder, 'audio', filename)
 
-                # If result is just a file path (string)
-                if isinstance(result, str):
-                    # Copy the generated file to static location
+                # Handle different return types
+                if isinstance(result, str) and os.path.isfile(result):
+                    # If result is a file path
                     shutil.copy2(result, static_file_path)
-
                     return jsonify({
                         'audio_url': f'/audio/{filename}',
                         'details': 'News podcast generated successfully'
                     })
-                else:
-                    # Handle object response
+                elif hasattr(result, 'audio_path'):
+                    # If result is an object with audio_path
                     shutil.copy2(result.audio_path, static_file_path)
-
                     return jsonify({
                         'audio_url': f'/audio/{filename}',
                         'details': result.details if hasattr(result, 'details') else 'News podcast generated successfully'
                     })
+                else:
+                    # If result is an error message
+                    return jsonify({'error': str(result)}), 400
 
             except Exception as e:
                 return jsonify({'error': str(e)}), 400
@@ -57,23 +58,35 @@ def index():
         else:
             # Handle custom podcast generation
             urls = request.form.get('urls', '').split(',')
-            podcast_name = request.form.get('podcast_name')
-            podcast_tagline = request.form.get('podcast_tagline')
-            user_instructions = request.form.get('user_instructions')
+
+            # Create conversation config
+            conversation_config = {
+                'word_count': int(request.form.get('word_count', 4000)),
+                'creativity': float(request.form.get('creativity', 0.7)),
+                'conversation_style': request.form.getlist('conversation_style[]'),
+                'roles_person1': request.form.get('roles_person1', 'Interviewer'),
+                'roles_person2': request.form.get('roles_person2', 'Subject matter expert'),
+                'dialogue_structure': request.form.getlist('dialogue_structure[]'),
+                'podcast_name': request.form.get('podcast_name'),
+                'podcast_tagline': request.form.get('podcast_tagline'),
+                'output_language': 'English',
+                'user_instructions': request.form.get('user_instructions'),
+                'engagement_techniques': request.form.getlist('engagement_techniques[]'),
+                'text_to_speech': {
+                    'temp_audio_dir': './data/audio/tmp/',
+                    'ending_message': "Thank you for listening to this episode.",
+                    'default_tts_model': tts_model,
+                    'audio_format': 'mp3'
+                }
+            }
 
             try:
-                # Generate custom podcast
+                # Generate custom podcast with new config
                 result = generate_podcast(
                     urls=urls,
-                    podcast_name=podcast_name,
-                    podcast_tagline=podcast_tagline,
-                    user_instructions=user_instructions,
+                    conversation_config=conversation_config,
                     tts_model=tts_model
                 )
-
-                # Check if result is a string (error message) or dict (success)
-                if isinstance(result, str):
-                    return jsonify({'error': result}), 400
 
                 # Create static/audio directory if it doesn't exist
                 os.makedirs(os.path.join(app.static_folder, 'audio'), exist_ok=True)
@@ -82,13 +95,24 @@ def index():
                 filename = f"podcast_{os.urandom(8).hex()}.mp3"
                 static_file_path = os.path.join(app.static_folder, 'audio', filename)
 
-                # Copy the generated file to static location
-                shutil.copy2(result.audio_path, static_file_path)
-
-                return jsonify({
-                    'audio_url': f'/audio/{filename}',
-                    'details': result.details if hasattr(result, 'details') else 'Podcast generated successfully'
-                })
+                # Handle different return types
+                if isinstance(result, str) and os.path.isfile(result):
+                    # If result is a file path
+                    shutil.copy2(result, static_file_path)
+                    return jsonify({
+                        'audio_url': f'/audio/{filename}',
+                        'details': 'Podcast generated successfully'
+                    })
+                elif hasattr(result, 'audio_path'):
+                    # If result is an object with audio_path
+                    shutil.copy2(result.audio_path, static_file_path)
+                    return jsonify({
+                        'audio_url': f'/audio/{filename}',
+                        'details': result.details if hasattr(result, 'details') else 'Podcast generated successfully'
+                    })
+                else:
+                    # If result is an error message
+                    return jsonify({'error': str(result)}), 400
 
             except Exception as e:
                 return jsonify({'error': str(e)}), 400
