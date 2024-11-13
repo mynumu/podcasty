@@ -39,6 +39,11 @@ def index():
         import tempfile
         import shutil
 
+        # Get API keys from form data
+        os.environ['GEMINI_API_KEY'] = request.form.get('gemini_key', '')
+        os.environ['OPENAI_API_KEY'] = request.form.get('openai_key', '')
+        os.environ['ELEVENLABS_API_KEY'] = request.form.get('elevenlabs_key', '')
+
         tts_model = request.form.get('tts_model', 'gemini')
 
         # Check if this is a news podcast request
