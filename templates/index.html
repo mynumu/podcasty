@@ -759,22 +759,45 @@
           }
         });
 
-      function saveApiKey(service) {
+      async function saveApiKey(service) {
         const input = document.getElementById(`${service}_key`);
-        localStorage.setItem(`${service}_key`, input.value);
-        alert(
-          `${service.charAt(0).toUpperCase() + service.slice(1)} API key saved!`
-        );
+
+        // Send API key to backend
+        const formData = new FormData();
+        formData.append(`${service}_key`, input.value);
+
+        try {
+          const response = await fetch("/api/keys", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to save API key");
+          }
+
+          // Only store a flag indicating the key is set, not the key itself
+          localStorage.setItem(`${service}_key_set`, "true");
+          alert(
+            `${
+              service.charAt(0).toUpperCase() + service.slice(1)
+            } API key saved!`
+          );
+        } catch (error) {
+          alert("Error saving API key: " + error.message);
+        }
       }
 
       // Load saved API keys
       window.addEventListener("load", () => {
         ["gemini", "openai", "elevenlabs"].forEach((service) => {
-          const savedKey = localStorage.getItem(`${service}_key`);
-          if (savedKey) {
-            document.getElementById(`${service}_key`).value = savedKey;
+          if (localStorage.getItem(`${service}_key_set`)) {
+            const input = document.getElementById(`${service}_key`);
+            input.value = "••••••••"; // Show dots instead of actual key
+            input.placeholder = "API key saved";
           }
         });
+        loadFormData();
       });
 
       const urlInput = document.getElementById("urlInput");
@@ -976,9 +999,10 @@
       window.addEventListener("load", () => {
         // Load API keys (existing code)
         ["gemini", "openai", "elevenlabs"].forEach((service) => {
-          const savedKey = localStorage.getItem(`${service}_key`);
-          if (savedKey) {
-            document.getElementById(`${service}_key`).value = savedKey;
+          if (localStorage.getItem(`${service}_key_set`)) {
+            const input = document.getElementById(`${service}_key`);
+            input.value = "••••••••"; // Show dots instead of actual key
+            input.placeholder = "API key saved";
           }
         });
 

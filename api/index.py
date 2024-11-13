@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, session
 import os
 from dotenv import load_dotenv
 
@@ -31,6 +31,17 @@ TEMP_DIR = '/tmp/audio'
 # Add near the top of the file
 port = int(os.getenv("PORT", 8080))
 
+# Add secret key for session management
+app.secret_key = os.urandom(24)  # Or use a fixed secret from environment variables
+
+@app.route('/api/keys', methods=['POST'])
+def save_api_keys():
+    """Endpoint to securely save API keys in session"""
+    session['gemini_key'] = request.form.get('gemini_key', '')
+    session['openai_key'] = request.form.get('openai_key', '')
+    session['elevenlabs_key'] = request.form.get('elevenlabs_key', '')
+    return jsonify({'status': 'success'})
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -39,10 +50,10 @@ def index():
         import tempfile
         import shutil
 
-        # Get API keys from form data
-        os.environ['GEMINI_API_KEY'] = request.form.get('gemini_key', '')
-        os.environ['OPENAI_API_KEY'] = request.form.get('openai_key', '')
-        os.environ['ELEVENLABS_API_KEY'] = request.form.get('elevenlabs_key', '')
+        # Get API keys from session instead of form data
+        os.environ['GEMINI_API_KEY'] = session.get('gemini_key', '')
+        os.environ['OPENAI_API_KEY'] = session.get('openai_key', '')
+        os.environ['ELEVENLABS_API_KEY'] = session.get('elevenlabs_key', '')
 
         tts_model = request.form.get('tts_model', 'gemini')
 
